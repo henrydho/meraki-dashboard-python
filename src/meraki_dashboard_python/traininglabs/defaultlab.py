@@ -13,15 +13,13 @@ def create_lab():
     print(f'Connnecting and logging to Meraki dashboard...')
     dashboard = meraki.DashboardAPI(
         api_key=utils.API_KEY, base_url=utils.BASE_URL, output_log=False)
-    # dashboard = meraki.DashboardAPI(
-    #     api_key='kdkdkdkdkdkd', base_url=utils.BASE_URL, output_log=False)
 
     try:
         # Get a list of organizations
         orgs = dashboard.organizations.getOrganizations()
     except meraki.exceptions.APIError as err:
         # print(f'Meraki API error: {err}')
-        print(f"Meraki API error: {err.message['errors'][0]}")
+        print(f"-> Meraki API error: {err.message['errors'][0]}")
     else:
         # Organizations list() filtered by organization name entered from UI
         filtered_orgs = ui.get_filtered_orgs(orgs)
@@ -39,13 +37,11 @@ def create_lab():
                 name=net_name,
                 type=net_type,
                 tags=net_tags,
-                timeZone=utils.TIME_ZONE)
-        except meraki.APIError:
-            pass
-            # print(err)
-            # print(
-            #     f'Meraki API error: '
-            #     f"{err.message['errors'][0]}")
+                timeZone=utils.DEFAULT_TIME_ZONE)
+        except meraki.APIError as err:
+            print(
+                f'-> Meraki API error: '
+                f"{err.message['errors'][0]}")
         else:
             print(
                 f'The new network \'{net_name}\' is successfully created '

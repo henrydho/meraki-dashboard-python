@@ -19,16 +19,7 @@ NET_TYPES = tuple((
 timeZone (string): The timezone of the network.
 Refer to 'TZ' column in the table in en.wikipedia.org
 """
-TIME_ZONE = 'Australia/NSW'
-
-
-def finder(iterable, iterator):
-    """Find a unique iterator in an iterable ojbect.
-
-    """
-    if iterator in iterable:
-        return iterator
-    return None
+DEFAULT_TIME_ZONE = 'Australia/NSW'
 
 
 def validate_net_name(net_name: str) -> str:
