@@ -4,6 +4,7 @@
 This module defines functions which are used to get information when the
 end-user enter details from command line.
 """
+import getpass
 from utilities import utils
 
 
@@ -36,6 +37,19 @@ def get_filtered_orgs(orgs: list) -> list:
                 'organization names to different name.\n')
             org_name = input(
                 'Enter the name of Meraki dashboard organization: ')
+
+
+def input_api_key() -> str:
+    """Get Meaki dashboard API key from user's input.
+
+    -> Return the string value of API key with leading whitespace removed
+    if the key is not a blank value.
+    """
+    api_key = getpass.getpass('Enter API Key: ')
+    while not api_key:
+        print("-> Data Error: API key can't be a blank value.")
+        api_key = getpass.getpass('Enter API Key: ')
+    return api_key.strip()
 
 
 def input_net_name() -> str:
