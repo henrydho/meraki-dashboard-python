@@ -46,8 +46,11 @@ def input_api_key() -> str:
     if the key is not a blank value.
     """
     api_key = getpass.getpass('Enter API Key: ')
-    while not api_key:
-        print("-> Data Error: API key can't be a blank value.")
+    while not api_key or api_key.isspace():
+        if api_key.isspace():
+            print('-> Data Error: API key contains all whitespace characters.')
+        else:
+            print("-> Data Error: API key can't be a blank value.")
         api_key = getpass.getpass('Enter API Key: ')
     return api_key.strip()
 
