@@ -2,6 +2,8 @@
 """Import required modules."""
 import os
 import re
+from typing import TypedDict
+import meraki
 
 # Constant variables declaration
 API_KEY = os.environ['MERAKI_API_KEY_HH']
@@ -100,7 +102,7 @@ def validate_net_type(device_code: str) -> str:
         f"code '{device_code.upper()}'.")
 
 
-def get_orgs(orgs: list, org_name: str) -> list:
+def get_filtered_orgs(orgs: list, org_name: str = None) -> list:
     """Get a list of organizations filtered by organization name.
 
     - orgs: organization list object
@@ -125,3 +127,58 @@ def get_orgs(orgs: list, org_name: str) -> list:
         return filtered_orgs
     raise ValueError(
         f"Data Error: The organization '{org_name}' does not exist!")
+
+
+def get_org_networks(dashboard: meraki.DashboardAPI, org_name: str) -> list:
+    """Get organization networks filtered by organization name.
+
+    - dashboard (meraki.DashboardAPI object): authenticated DashboardAPI
+      session.
+    - org_name (string): organization name
+    -> Return a list of networks of the org_name.
+    """
+    try:
+        orgs = dashboard.organizations.getOrganizations()
+    except UnboundLocalError as err:
+        print(
+            'Meraki API key error: '
+            f'API key contains whitespace characters - {err}')
+    except meraki.APIKeyError as err:
+        print(f'-> {err}')
+    except meraki.APIError as err:
+        print(f'-> {err}')
+    else:
+        try:
+            org = get_filtered_orgs(orgs, org_name)
+        except ValueError as err:
+            print(f'-> {err}')
+        else:
+            org_id = org['id']
+            org_networks = dashboard.networks.getOrganizationNetworks(org_id)
+            return org_networks
+
+
+def init_dashboard_session(authentication) -> TypedDict(
+        'DashSession', {'dashboardAPI': meraki.DashboardAPI,
+                        'organizations': list}):
+    """Get authenticated DashboardAPI session.
+
+    - authentication: authentication value
+    -> Return a dict() including an authenticated meraki.DashboardAPI object,
+       and authorized organizations list if authenticated.
+    -> Raise ValueError if API key is not authorised.
+    * Note: meraki.APIKeyError only validates blank API key, but does not
+      Validate whitepsace characters and throwing Exception.
+    """
+    try:
+        dashboard = meraki.DashboardAPI(
+            api_key=authentication, base_url=BASE_URL, output_log=False)
+        orgs = dashboard.organizations.getOrganizations()
+    except meraki.APIKeyError:
+        pass
+    except meraki.exceptions.APIError:
+        pass
+    else:
+        return {'dashboardAPI': dashboard, 'organizations': orgs}
+    raise ValueError(
+        'Authentication error: API key is not authorized!')
