@@ -90,8 +90,8 @@ def validate_net_type(net_type: str) -> str:
     - net_type (string):
         + a specific nework type, or
         + a combined network with the network types separated by space.
-    -> Return a string value of netowrk types.
-    -> Raise ValueError if network type is valid.
+    -> Return a string value of the netowrk types.
+    -> Raise ValueError if the network type is valid.
     """
     invalid_chars_regex = re.compile(r'[~`!@#$%^&*()-_+={}\[\]|\\/:"\',<>?.]')
     if invalid_chars_regex.search(net_type) is None:
@@ -121,21 +121,22 @@ def get_dict_values(dict_keys: list, a_dict: dict) -> list:
     return a_list
 
 
-def init_dashboard_session(authentication) -> TypedDict(
+def init_dashboard_session(auth) -> TypedDict(
         'DashboardSession', {'dashboardAPI': meraki.DashboardAPI,
                              'organizations': list}):
-    """Get authenticated DashboardAPI session.
-    ** Note: meraki.APIKeyError only validates blank API key, but does not
+    """Get the authenticated DashboardAPI session.
+    ** Note: meraki.APIKeyError only validates the blank API key, but does not
       Validate whitepsace characters and throwing Exception.
 
-    - authentication: authentication value
-    -> Return a dict() including an authenticated meraki.DashboardAPI object,
-       and authorized organizations list if authenticated.
-    -> Raise ValueError if API key is not authorised.
+    - auth: authentication value
+    -> Return a dict() including an the authenticated meraki.DashboardAPI
+       object and the authorized organizations list if authenticated.
+    -> Raise ValueError if the API key is not authorised.
     """
     try:
         dashboard = meraki.DashboardAPI(
-            api_key=authentication, base_url=BASE_URL, output_log=False)
+            api_key=auth, base_url=BASE_URL, output_log=False,
+            print_console=False)
         orgs = dashboard.organizations.getOrganizations()
     except meraki.APIKeyError:
         pass
@@ -149,7 +150,7 @@ def init_dashboard_session(authentication) -> TypedDict(
 
 def filter_orgs(orgs: list, org_name: str,
                 unique_org: bool = False) -> Tuple[list, dict]:
-    """Get a list of organizations filtered by organization name.
+    """Get a list of organizations filtered by an organization name.
     ** Note: Orginazation name is not unique and not case sensitive.
 
     - orgs (list): organization list object
@@ -160,7 +161,7 @@ def filter_orgs(orgs: list, org_name: str,
     -> Raised UserWarning if org_name is not unique and unique_org set to True.
     -> Raised ValueError if a provided organization name  does not exist.
     """
-    # Get a list of organizations filtered by organization name.
+    # Get a list of organizations filtered by an organization name.
     filtered_orgs = [
         dict(id=org['id'], name=org['name'], url=org['url'])
         for org in orgs if org_name == org['name']

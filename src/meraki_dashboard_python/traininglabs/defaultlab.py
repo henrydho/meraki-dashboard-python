@@ -3,39 +3,34 @@
 import json
 import meraki
 from utilities import utils
-from utilities import uicli as ui
+from utilities import userinputcli as uicli  # Userinput CLI module
 
 
-def create_lab():
-    """New lab function."""
+def create_network():
+    """Create a new network."""
 
-    api_key = ui.input_api_key()  # Get API key from user's input
-    while api_key:  # API key is not an empty string
+    api_key = uicli.input_api_key()  # Get API key from user's input
+    while api_key:
         try:
-            dashboard = meraki.DashboardAPI(
-                api_key=api_key, base_url=utils.BASE_URL, output_log=False)
-            # Get a list of organizations
-            print(f'Connnecting and logging to Meraki dashboard...')
-            orgs = dashboard.organizations.getOrganizations()
-        except meraki.exceptions.APIError as api_err:
-            print(f"-> Meraki API error: {api_err}")
-            api_key = ui.input_api_key()  # Get API key from user's input
+            dashboard_session = utils.init_dashboard_session(auth=api_key)
+        except ValueError as err:
+            print(err)
+            api_key = uicli.input_api_key()  # Get API key from user's input
         else:
             break
 
-    # Organizations list() filtered by organization name entered from UI
-    filtered_orgs = ui.get_filtered_orgs(orgs)
-    org_name = filtered_orgs[0]['name']  # Organization name
-    org_id = filtered_orgs[0]['id']  # Organization ID
-    net_name = ui.input_net_name()  # Network name
-    net_tags = ui.input_tags()  # Network tags
-    net_type = ui.input_net_type()  # Nework type
+    dashboard = dashboard_session['dashboardAPI']  # Persistent dashboard API
+    orgs = dashboard_session['organizations']  # List of organizations
+    org = uicli.input_get_org(orgs)  # Get a specific organization
+    net_name = uicli.input_net_name()  # Network name
+    net_tags = uicli.input_tags(tag_type='network')  # Network tags
+    net_type = ' '.join(uicli.input_net_type())  # Nework type
 
-    # Create new organization network
-    print(f'Creating a new network: \'{net_name}\'...')
+    # Create a new Meraki network
+    print(f"Creating a new Meraki network: '{net_name}'...\n")
     try:
         new_network = dashboard.networks.createOrganizationNetwork(
-            organizationId=org_id,
+            organizationId=org['id'],
             name=net_name,
             type=net_type,
             tags=net_tags,
@@ -46,6 +41,11 @@ def create_lab():
             f"{err.message['errors'][0]}")
     else:
         print(
-            f'The new network \'{net_name}\' is successfully created '
-            f'for the \'{org_name}\' organization!')
+            f"The new Mereaki network '{net_name}' is successfully created "
+            f"for the organization '{org['name']}'!")
         print(json.dumps(new_network, indent=4))
+
+
+def create_lab():
+    """Default lab"""
+    create_network()
