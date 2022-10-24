@@ -17,10 +17,3 @@ such as pre-defined classes or functions which are used among those workflows.
 The project is written in Python 3.6 or above using either REST API or
 the Meraki Dashboard API SDK (`PyPI <https://pypi.org/project/meraki/>`_ or
 `GitHub <https://github.com/meraki/dashboard-api-python/>`_).
-
-
-Note
-====
-
-This project has been set up using PyScaffold 3.2.3. For details and usage
-information on PyScaffold see https://pyscaffold.org/.
